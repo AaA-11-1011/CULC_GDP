@@ -24,6 +24,7 @@ GitHubの [Releases](https://github.com/AaA-11-1011/CULC_GDP/releases) から最
 ### 3. ファイルの配置
 解凍したフォルダの中に、手順1でダウンロードした `SIKS*.csv` を入れます。
 ※ `culc_gdp.exe` と同じ場所に置いてください。
+
 ![展開ディレクトリ](docs/images/zip.png)
 
 ### 4. 実行
