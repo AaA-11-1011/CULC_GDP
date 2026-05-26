@@ -1,14 +1,17 @@
-# Python-generated files
+# 個人成績データ (プライバシー保護のため絶対に上げない)
+SIKS*.csv
+SIRS*.csv
+SIRS*.txt
+
+# 実行結果
+gdp_result.txt
+debug_subjects.txt
+
+# Pythonキャッシュ
 __pycache__/
-*.py[oc]
+*.py[cod]
+
+# PyInstaller (EXE化) 関連
 build/
 dist/
-wheels/
-*.egg-info
-
-# Virtual environments
-.venv
-
-#personal information
-*.txt
-*.csv
+*.spec
