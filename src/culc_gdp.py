@@ -49,6 +49,13 @@ def get_pad(text, length):
         count += 2 if ord(c) > 255 else 1
     return text + " " * max(0, length - count)
 
+def find_col(header, target):
+    """ヘッダー内からターゲットの文字列を含む列のインデックスを探す"""
+    for i, col in enumerate(header):
+        if target in col:
+            return i
+    raise ValueError(f"列 '{target}' が見つかりませんでした。")
+
 def process_siks(file_path, config):
     reqs = config["requirements"]
     mapping = config.get("siks_category_mapping", {})
@@ -68,24 +75,33 @@ def process_siks(file_path, config):
                 found_header = True
                 break
         
-        if not found_header: return None
+        if not found_header: 
+            print("エラー: CSV内に 'No.' 列が見つかりませんでした。ファイル形式を確認してください。")
+            return None
 
-        col_cat_detail = header.index("科目詳細区分")
-        col_cat_sub = header.index("科目小区分")
-        col_name = header.index("開講科目名")
-        col_credits = header.index("単位数")
-        col_grade = header.index("評語")
-        col_pass = header.index("合否")
+        try:
+            col_cat_detail = find_col(header, "科目詳細区分")
+            col_cat_sub = find_col(header, "科目小区分")
+            col_name = find_col(header, "開講科目名")
+            col_credits = find_col(header, "単位数")
+            col_grade = find_col(header, "評語")
+            col_pass = find_col(header, "合否")
+        except ValueError as e:
+            print(f"エラー: {e}")
+            return None
 
         for row in reader:
             if len(row) < col_pass + 1: continue
             
-            cat_detail = normalize(row[col_cat_detail])
-            cat_sub = normalize(row[col_cat_sub])
-            name = normalize(row[col_name])
-            credits = float(row[col_credits])
-            grade = normalize(row[col_grade]).upper()
-            passed = normalize(row[col_pass])
+            try:
+                cat_detail = normalize(row[col_cat_detail])
+                cat_sub = normalize(row[col_cat_sub])
+                name = normalize(row[col_name])
+                credits = float(row[col_credits])
+                grade = normalize(row[col_grade]).upper()
+                passed = normalize(row[col_pass])
+            except (ValueError, IndexError):
+                continue
 
             if not grade and not passed: continue
 
@@ -186,28 +202,39 @@ def calculate_gdp(file_path, config):
         f.write("\n".join(subject_details))
 
 if __name__ == "__main__":
-    # 実行ファイルのディレクトリを取得
-    if getattr(sys, 'frozen', False):
-        # .exeで実行されている場合
-        base_dir = os.path.dirname(sys.executable)
-    else:
-        # .pyで実行されている場合
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-
-    config = load_config(base_dir)
-    if config:
-        # SIKSを優先的に検索
-        target_file = next((os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.startswith('SIKS') and f.endswith('.csv')), None)
-        if not target_file:
-            target_file = next((os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.startswith('SIRS') and (f.endswith('.txt') or f.endswith('.csv'))), None)
-        
-        if target_file:
-            calculate_gdp(target_file, config)
+    try:
+        # 実行ファイルのディレクトリを取得
+        if getattr(sys, 'frozen', False):
+            # .exeで実行されている場合
+            base_dir = os.path.dirname(sys.executable)
         else:
-            print(f"エラー: フォルダ {base_dir} 内に SIKS*.csv または SIRS*.txt が見つかりません。")
-            print("KOANからダウンロードしたファイルをこのプログラムと同じ場所に置いてください。")
-    else:
-        print("エラー: config.json が見つかりません。")
+            # .pyで実行されている場合
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        config = load_config(base_dir)
+        if config:
+            # SIKSを優先的に検索
+            target_file = next((os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.startswith('SIKS') and f.endswith('.csv')), None)
+            if not target_file:
+                target_file = next((os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.startswith('SIRS') and (f.endswith('.txt') or f.endswith('.csv'))), None)
+            
+            if target_file:
+                calculate_gdp(target_file, config)
+            else:
+                print(f"エラー: フォルダ {base_dir} 内に SIKS*.csv または SIRS*.txt が見つかりません。")
+                print("KOANからダウンロードしたファイルをこのプログラムと同じ場所に置いてください。")
+        else:
+            print("エラー: config.json が見つかりません。")
+            
+    except Exception as e:
+        import traceback
+        print("\n" + "!"*50)
+        print("予期しないエラーが発生しました:")
+        print(f"Error: {e}")
+        print("-" * 50)
+        traceback.print_exc()
+        print("!"*50)
     
-    print("\n" + "="*30)
-    input("処理が完了しました。エンターキーを押すと終了します...")
+    finally:
+        print("\n" + "="*30)
+        input("処理が完了（または中断）しました。エンターキーを押すと終了します...")
