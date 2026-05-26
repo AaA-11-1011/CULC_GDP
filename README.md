@@ -41,7 +41,7 @@ GitHubの [Releases](https://github.com/AaA-11-1011/CULC_GDP/releases) から最
 画面に結果が表示されるほか、フォルダ内に `gdp_result.txt`（詳細レポート）が保存されます。
 
 
-## .exeを使わない使い方(pythonインストール必要)
+## .exeを使わない使い方(macなど)(pythonインストール必要)
 リポジトリごとコピーして
 ```
 python3 src/culc_gdp.py
