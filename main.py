@@ -1,5 +1,5 @@
 def main():
-    print("Hello from culc-gdp!")
+    print("Hello from calc-gpa!")
 
 
 if __name__ == "__main__":

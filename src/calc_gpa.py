@@ -5,7 +5,7 @@ import json
 import unicodedata
 
 # ==============================================================================
-# 大阪大学 理学部 物理学科 単位・GDP計算ツール (SIKS/SIRS対応版)
+# 大阪大学 理学部 物理学科 単位・GPA計算ツール (SIKS/SIRS対応版)
 # ==============================================================================
 
 GRADE_MAPPING = {
@@ -133,7 +133,7 @@ def process_siks(file_path, config):
 
     return results, subject_details
 
-def calculate_gdp(file_path, config):
+def calculate_gpa(file_path, config):
     is_siks = "SIKS" in os.path.basename(file_path)
     print(f"Reading ({'SIKS' if is_siks else 'SIRS'}): {os.path.basename(file_path)}\n")
     
@@ -196,7 +196,7 @@ def calculate_gdp(file_path, config):
     phy_c = sum(results[c]["gpa_credits"] for c in phy_cats)
     log(f"\n【参考】研究室配属用GPA (専門基礎＋専門教育): {round(phy_gp / phy_c, 3) if phy_c > 0 else 0}")
 
-    with open(os.path.join(os.path.dirname(file_path), "gdp_result.txt"), "w", encoding="utf-8") as f:
+    with open(os.path.join(os.path.dirname(file_path), "gpa_result.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(output_lines))
     with open(os.path.join(os.path.dirname(file_path), "debug_subjects.txt"), "w", encoding="utf-8") as f:
         f.write("\n".join(subject_details))
@@ -219,7 +219,7 @@ if __name__ == "__main__":
                 target_file = next((os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.startswith('SIRS') and (f.endswith('.txt') or f.endswith('.csv'))), None)
             
             if target_file:
-                calculate_gdp(target_file, config)
+                calculate_gpa(target_file, config)
             else:
                 print(f"エラー: フォルダ {base_dir} 内に SIKS*.csv または SIRS*.txt が見つかりません。")
                 print("KOANからダウンロードしたファイルをこのプログラムと同じ場所に置いてください。")
